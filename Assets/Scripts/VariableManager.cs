@@ -4,21 +4,17 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class VariableManager : MonoBehaviour {
-	GameObject panel;
+	//GameObject panel;
 
 	void Awake() {
-		panel = GameObject.Find ("Panel");
-		panel.GetComponent<Image> ().enabled = false;
+		//panel = GameObject.Find ("Panel");
+		//panel.GetComponent<Image> ().enabled = false;
 	}
 
-	public void SetPanel(bool value) {
-		panel.GetComponent<Image> ().enabled = value;
-	}
+	public void SetButton(GameObject button, bool value) {
+		button.GetComponent<Image>().enabled = value;
+		button.GetComponent<Button>().enabled = value;
+		button.GetComponentInChildren<Text>().enabled = value;
 
-
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 }
