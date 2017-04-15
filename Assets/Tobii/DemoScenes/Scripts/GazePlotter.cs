@@ -53,7 +53,7 @@ public class GazePlotter : MonoBehaviour
     void Update()
     {
         GazePoint gazePoint = EyeTracking.GetGazePoint();
-
+		//print (gazePoint);
         if (gazePoint.SequentialId > _lastGazePoint.SequentialId &&
             gazePoint.IsWithinScreenBounds)
         {
