@@ -84,35 +84,25 @@ public class EyeGazeManager : MonoBehaviour
 	void Update() {
 
 
-		if (rotateButtonGazeAware.HasGazeFocus) {
-			if (!gazeStarted) {
-				startTime = Time.time;
-				gazeStarted = true;
-			}
-		
-			if (gazeStarted && Time.time > startTime + 2.0f) {
-				gazeStarted = false;
-				rotateButtonClick ();
 
-			}
-		} else
-			gazeStarted = false;
 
 		if (rotateCar) {
 			car.transform.Rotate(0, 30 * Time.deltaTime, 0);
 		}
 
-		if (inventoryButtonGazeAware.HasGazeFocus) {
-			inventoryButtonClick ();
+
+		// FUNCTIONALITY
+
+		if (rotateButtonGazeAware.HasGazeFocus) {
+			gazeTimer ("Rotate");
+		} 
+		else if (inventoryButtonGazeAware.HasGazeFocus) {
+			gazeTimer ("Inventory");
+
 		}
+		else if (engineGazeAware.HasGazeFocus) {
+			gazeTimer ("Car Body");
 
-		/*if (inventoryPanel) {
-			
-
-
-		}*/
-		if (engineGazeAware.HasGazeFocus) {
-			carBodyClick ("carPartEngine");
 		} /*else if (interiorGazeAware.HasGazeFocus) {
 				carPart = interior;
 				modelCar = true;
@@ -122,6 +112,23 @@ public class EyeGazeManager : MonoBehaviour
 				modelCar = true;
 				inventoryPanel = false;
 			}*/
+
+		//print (temp);
+
+		else if (redButtonGazeAware.HasGazeFocus) {//if (carPart != null && redButtonGazeAware.HasGazeFocus) {
+			gazeTimer("Red");
+
+		} else if (blueButtonGazeAware.HasGazeFocus) {//else if (carPart!=null && blueButtonGazeAware.HasGazeFocus)
+			gazeTimer("Blue");
+		} else if (blackButtonGazeAware.HasGazeFocus) {//else if (carPart!=null && blackButtonGazeAware.HasGazeFocus)
+			gazeTimer("Black");
+		} else if (closeInventoryButtonGazeAware.HasGazeFocus) {
+			gazeTimer ("Close Inventory");
+		}
+		else {
+			gazeStarted = false;
+		}
+
 		if (carPart!=null && bringCarPartToCenter) {
 			vm.ModelCar (carAnimator, carPart);
 			vm.SetButton (closeInventoryButton, true);
@@ -129,20 +136,6 @@ public class EyeGazeManager : MonoBehaviour
 			vm.SetButton (redButton, true);
 			vm.SetButton (blackButton, true);
 		}
-
-		//print (temp);
-
-		if (redButtonGazeAware.HasGazeFocus) {//if (carPart != null && redButtonGazeAware.HasGazeFocus) {
-			colorButtonClick ("Red");
-		} else if (blueButtonGazeAware.HasGazeFocus) {//else if (carPart!=null && blueButtonGazeAware.HasGazeFocus)
-			colorButtonClick ("Blue");
-		} else if (blackButtonGazeAware.HasGazeFocus) {//else if (carPart!=null && blackButtonGazeAware.HasGazeFocus)
-			colorButtonClick("Black");
-		} else if (closeInventoryButtonGazeAware.HasGazeFocus) {
-			closeInventoryButtonClick ();
-		}
-
-
 
 	}
 
@@ -158,6 +151,7 @@ public class EyeGazeManager : MonoBehaviour
 		if(carPart != null)
 			vm.SetMaterial (carPart, color);
 	}
+
 	public void closeInventoryButtonClick(){
 		vm.SetButton (blueButton, false);
 		vm.SetButton (redButton, false);
@@ -175,15 +169,18 @@ public class EyeGazeManager : MonoBehaviour
 			implode = null;
 		}
 	}
+
 	public void rotateButtonClick(){
 		rotateCar = !rotateCar;
 	}
+
 	public void inventoryButtonClick(){
 		inventoryPanel = true;
 		vm.SetButton (inventoryButton, false);
 		carAnimator.SetBool("Explode", true);
 		carAnimator.SetBool("Implode", false);
 	}
+
 	public void carBodyClick(string strCarPart){
 		if (inventoryPanel && strCarPart=="carPartEngine") {
 			carPart = engine;
@@ -192,5 +189,52 @@ public class EyeGazeManager : MonoBehaviour
 		}
 	}
 
+
+	//Gaze Timer
+
+	public void gazeTimer(string functionName) {
+		if (!gazeStarted) {
+			startTime = Time.time;
+			gazeStarted = true;
+		}
+
+		if (gazeStarted && Time.time > startTime + 2.0f) {
+			gazeStarted = false;
+
+			switch (functionName) {
+
+			case "Rotate":
+				rotateButtonClick ();
+				break;
+			case "Inventory":
+				inventoryButtonClick ();
+				break;
+			case "Car Body":
+				carBodyClick ("carPartEngine");
+				break;
+
+			case "Red":
+				colorButtonClick ("Red");
+				break;
+
+			case "Blue":
+				colorButtonClick ("Blue");
+				break;
+
+			case "Black":
+				colorButtonClick ("Black");
+				break;
+			case "Close Inventory":
+				closeInventoryButtonClick ();
+				break;
+			
+			default:
+				print ("Could not find the correct option!");
+				break;
+			
+			}
+
+		}
+	}
 
 }
