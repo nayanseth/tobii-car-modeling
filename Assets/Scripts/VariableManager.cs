@@ -27,6 +27,7 @@ public class VariableManager : MonoBehaviour {
 	}
 
 	public void SetMaterial(GameObject carPart, string materialColor) {
+		//print (carPart);
 		Color c = Color.white;
 		if (materialColor == "Red")
 			c = Color.red;
