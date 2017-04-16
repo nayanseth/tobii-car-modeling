@@ -121,7 +121,7 @@ public class EyeGazeManager : MonoBehaviour
 			}
 		}
 
-		if (modelCar && carPart!=null) {
+		if (carPart!=null && modelCar) {
 			vm.ModelCar (carAnimator, carPart);
 			vm.SetButton (closeInventoryButton, true);
 			vm.SetButton (blueButton, true);
@@ -140,12 +140,17 @@ public class EyeGazeManager : MonoBehaviour
 
 		print ("Before Close");
 		if (closeInventoryButtonGazeAware.HasGazeFocus) {
-			vm.SetButton (blueButton,false);
-			vm.SetButton (redButton,false);
-			vm.SetButton (blackButton,false);
+			vm.SetButton (blueButton, false);
+			vm.SetButton (redButton, false);
+			vm.SetButton (blackButton, false);
 
-			if(implode=="Engine")
+			if (implode == "Engine") {
+				carPart = null;
 				carAnimator.SetInteger ("Engine", 0);
+			} else if (carPart == null) {
+				carAnimator.SetBool ("Explode", false);
+				carAnimator.SetBool ("Implode", true);
+			}
 
 		}
 
