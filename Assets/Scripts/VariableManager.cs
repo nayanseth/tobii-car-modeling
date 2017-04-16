@@ -23,7 +23,7 @@ public class VariableManager : MonoBehaviour {
 			a.SetInteger ("Engine", 1);
 		}
 			
-		GameObject.Find ("Managers").GetComponent<EyeGazeManager> ().modelCar = false;
+		GameObject.Find ("Managers").GetComponent<EyeGazeManager> ().bringCarPartToCenter = false;
 	}
 
 	public void SetMaterial(GameObject carPart, string materialColor) {

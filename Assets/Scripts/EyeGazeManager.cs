@@ -11,17 +11,16 @@ public class EyeGazeManager : MonoBehaviour
 	GameObject rotateButton, inventoryButton, closeInventoryButton, blueButton, redButton, blackButton;
 	GazeAware rotateButtonGazeAware, inventoryButtonGazeAware, closeInventoryButtonGazeAware, redButtonGazeAware, blueButtonGazeAware, blackButtonGazeAware;
 	GameObject car;
-	bool rotateCar;
-	bool inventoryPanel;
-	public bool modelCar;
+	bool rotateCar, inventoryPanel, implodeFlag, gazeStarted;
+	public bool bringCarPartToCenter;
 	Animator carAnimator;
 	VariableManager vm;
 	string implode;
-
 	GameObject carPart, engine, interior, bodyFront, bodyRear;
 	GazeAware engineGazeAware, interiorGazeAware, bodyFrontGazeAware, bodyRearGazeAware;
 	Material[] originalMaterial;
 
+	float startTime;
 
 	// Use this for initialization
 	void Start()
@@ -76,7 +75,9 @@ public class EyeGazeManager : MonoBehaviour
 		bodyRear = GameObject.Find ("BodyRear");
 		bodyRearGazeAware = bodyRear.GetComponent<GazeAware> ();
 
-		modelCar = false;
+		implodeFlag = false;
+		bringCarPartToCenter = false;
+		gazeStarted = false;
 	}
 
 	// Update is called once per frame
@@ -84,33 +85,35 @@ public class EyeGazeManager : MonoBehaviour
 
 
 		if (rotateButtonGazeAware.HasGazeFocus) {
-			rotateCar = !rotateCar;
-		}
+			if (!gazeStarted) {
+				startTime = Time.time;
+				gazeStarted = true;
+			}
+		
+			if (gazeStarted && Time.time > startTime + 2.0f) {
+				gazeStarted = false;
+				rotateButtonClick ();
+
+			}
+		} else
+			gazeStarted = false;
 
 		if (rotateCar) {
 			car.transform.Rotate(0, 30 * Time.deltaTime, 0);
 		}
 
 		if (inventoryButtonGazeAware.HasGazeFocus) {
-			inventoryPanel = true;
-			//vm.SetPanel (true);
+			inventoryButtonClick ();
 		}
 
-		if (closeInventoryButtonGazeAware.HasGazeFocus) {
-			carAnimator.SetBool("Explode", false);
-			carAnimator.SetBool("Implode", true);
-		}
+		/*if (inventoryPanel) {
+			
 
-		if (inventoryPanel) {
-			vm.SetButton (inventoryButton, false);
-			carAnimator.SetBool("Explode", true);
-			carAnimator.SetBool("Implode", false);
 
-			if (engineGazeAware.HasGazeFocus) {
-				carPart = engine;
-				modelCar = true;
-				inventoryPanel = false;
-			} else if (interiorGazeAware.HasGazeFocus) {
+		}*/
+		if (engineGazeAware.HasGazeFocus) {
+			carBodyClick ("carPartEngine");
+		} /*else if (interiorGazeAware.HasGazeFocus) {
 				carPart = interior;
 				modelCar = true;
 				inventoryPanel = false;
@@ -118,10 +121,8 @@ public class EyeGazeManager : MonoBehaviour
 				carPart = bodyFront;
 				modelCar = true;
 				inventoryPanel = false;
-			}
-		}
-
-		if (carPart!=null && modelCar) {
+			}*/
+		if (carPart!=null && bringCarPartToCenter) {
 			vm.ModelCar (carAnimator, carPart);
 			vm.SetButton (closeInventoryButton, true);
 			vm.SetButton (blueButton, true);
@@ -131,37 +132,65 @@ public class EyeGazeManager : MonoBehaviour
 
 		//print (temp);
 
-		if (carPart!=null && redButtonGazeAware.HasGazeFocus)
-			vm.SetMaterial (carPart, "Red");
-		else if (carPart!=null && blueButtonGazeAware.HasGazeFocus)
-			vm.SetMaterial (carPart, "Blue");
-		else if (carPart!=null && blackButtonGazeAware.HasGazeFocus)
-			vm.SetMaterial (carPart, "Black");
-
-		print ("Before Close");
-		if (closeInventoryButtonGazeAware.HasGazeFocus) {
-			vm.SetButton (blueButton, false);
-			vm.SetButton (redButton, false);
-			vm.SetButton (blackButton, false);
-
-			if (implode == "Engine") {
-				carPart = null;
-				carAnimator.SetInteger ("Engine", 0);
-			} else if (carPart == null) {
-				carAnimator.SetBool ("Explode", false);
-				carAnimator.SetBool ("Implode", true);
-			}
-
+		if (redButtonGazeAware.HasGazeFocus) {//if (carPart != null && redButtonGazeAware.HasGazeFocus) {
+			colorButtonClick ("Red");
+		} else if (blueButtonGazeAware.HasGazeFocus) {//else if (carPart!=null && blueButtonGazeAware.HasGazeFocus)
+			colorButtonClick ("Blue");
+		} else if (blackButtonGazeAware.HasGazeFocus) {//else if (carPart!=null && blackButtonGazeAware.HasGazeFocus)
+			colorButtonClick("Black");
+		} else if (closeInventoryButtonGazeAware.HasGazeFocus) {
+			closeInventoryButtonClick ();
 		}
 
 
 
 	}
 
+
+
 	public void SetImplodePart(string value) {
 		implode = value;
 	}
 
+
+	//button actions
+	public void colorButtonClick(string color){
+		if(carPart != null)
+			vm.SetMaterial (carPart, color);
+	}
+	public void closeInventoryButtonClick(){
+		vm.SetButton (blueButton, false);
+		vm.SetButton (redButton, false);
+		vm.SetButton (blackButton, false);
+		if (!implodeFlag && implode == "Engine") {
+			carAnimator.SetInteger ("Engine", 0);
+			implodeFlag = true;
+			inventoryPanel = true;
+		} else if (implodeFlag) {
+			vm.SetButton (closeInventoryButton, false);
+			vm.SetButton (inventoryButton, true);
+			carAnimator.SetBool ("Explode", false);
+			carAnimator.SetBool ("Implode", true);
+			implodeFlag = false;
+			implode = null;
+		}
+	}
+	public void rotateButtonClick(){
+		rotateCar = !rotateCar;
+	}
+	public void inventoryButtonClick(){
+		inventoryPanel = true;
+		vm.SetButton (inventoryButton, false);
+		carAnimator.SetBool("Explode", true);
+		carAnimator.SetBool("Implode", false);
+	}
+	public void carBodyClick(string strCarPart){
+		if (inventoryPanel && strCarPart=="carPartEngine") {
+			carPart = engine;
+			bringCarPartToCenter = true;
+			inventoryPanel = false;
+		}
+	}
 
 
 }
